@@ -1,4 +1,9 @@
+import threading
 import socket
+
+def handle_client(conn, addr):
+    print(f"Handling client {addr}")
+    conn.close()
 
 HOST = 'localhost'
 PORT = 51234
@@ -11,5 +16,5 @@ print(f"Server listening on {HOST}:{PORT}")
 
 while True:
     conn, addr = server_socket.accept()
-    print(f"Connected by {addr}")
-    conn.close()
+    thread = threading.Thread(target=handle_client, args=(conn, addr))
+    thread.start()

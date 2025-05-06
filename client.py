@@ -1,18 +1,32 @@
 import socket
 import sys
 
-HOST = sys.argv[1]
-PORT = int(sys.argv[2])
-REQ_FILE = sys.argv[3]
+def send_request(host, port, request):
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect((host, port))
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.connect((HOST, PORT))
-    with open(REQ_FILE, 'r') as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            message = f"{len(line)+4:03} {line}"  # Add size prefix
-            s.sendall(message.encode())
-            response = s.recv(1024).decode()
-            print(f"{line}: {response}")
+    # Send request to server
+    client.send(request.encode('utf-8'))
+
+    # Receive and print the response
+    response = client.recv(1024).decode('utf-8')
+    print(f"Server response: {response}")
+
+    client.close()
+
+# Read request file and send requests
+def main():
+    if len(sys.argv) != 4:
+        print("Usage: client.py <hostname> <port> <request_file>")
+        return
+
+    host = sys.argv[1]
+    port = int(sys.argv[2])
+    request_file = sys.argv[3]
+
+    with open(request_file, 'r') as file:
+        for line in file:
+            send_request(host, port, line.strip())
+
+if __name__ == "__main__":
+    main()
